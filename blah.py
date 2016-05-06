@@ -1,55 +1,51 @@
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 import re
-import matplotlib.pyplot
-import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot
+#import numpy as np
+#import matplotlib.pyplot as plt
 
 def get_results():
-    """will return a tuple of (lists, boroughs) where lists is a list of 5 lists corresponding to the couch prices in each borough and boroughs is the list of boroughs in the same order"""
     rows = []
-    #get the first page for all five boroughs
-    search_url = ['https://newyork.craigslist.org/search/brk/fua', 'https://newyork.craigslist.org/search/stn/fua', 'https://newyork.craigslist.org/search/mnh/fua', 'https://newyork.craigslist.org/search/brx/fua', 'https://newyork.craigslist.org/search/que/fua']
-    couch = '?query=couch'
-    couch_next = '?s=100&query=couch'
+    month_dict = {1:31, 2:29, 3:31, 4:30}
+    months_test = {1:4, 2:5}
+    search_url = 'http://www.reuters.com/resources/archive/us/20160123.html'
+    search_base = 'http://www.reuters.com/resources/archive/us/20160'
+    search_end = ".html"
+    lis = []
+    for i in range(1,2):
+        day  = i + 1
+        if day < 10:
+            day = '01'
+        else:
+            day - str(day)
+        print(search_base + str(i) + day + search_end)
+        soup = BeautifulSoup(urlopen(search_base + str(i) + day + search_end).read(), 'html.parser')
+        print("Date" + str(i))
+        totalcount = soup.find_all('div', {'class':'module'})
+        for row in totalcount:
+            #remove the html tags
+            tokens = str(row).split('>')
+            for item in tokens:
+                #if it starts with a letter then its text
+                #otherwise unwanted data
+                if item[0:1].isalpha():
+                    #remove ending html tag portion that wasn't removed by split()
+                    #text is located at first index
+                    lis.append(item.split('<')[0])
+    for l in lis:
+        print(l)
 
-    url_dict = {'https://newyork.craigslist.org/search/brk/fua':'brooklyn','https://newyork.craigslist.org/search/stn/fua':'staten island', 'https://newyork.craigslist.org/search/mnh/fua':'manhattan', 'https://newyork.craigslist.org/search/brx/fua':'bronx', 'https://newyork.craigslist.org/search/que/fua':'queens'}
-    soup = [ BeautifulSoup(urlopen(s + couch).read(), 'html.parser') for s in search_url]
 
-    #extract the total count for each neighborhood
-    totalcount = [soup_el.find_all('span', {'class':'totalcount'}) for soup_el in soup]
-    neighborhood_totals = []
-
-    #count the totals for each neighborhood
-    for t in totalcount:
-        neighborhood_totals.append(int(re.findall('\d+', str(t[0::2]))[0]))
-
-    #extract price rows from soup object
-    rows = [soup_el.find_all('span', {'class': 'price'}) for soup_el in soup]
+   # soup = BeautifulSoup(urlopen(search_url).read(), 'html.parser')
+   # totalcount = soup.find_all('div', {'class':'module'})
+   # for a in totalcount:
+    #    x = str(a).split('>')
+     #   for y in x:
+      #      if y[0:1].isalpha():
+       #         z = y.split('<')
+        #        print(z[0])
 
 
-    #if the count > 100, request data from a new page
-    for n in range(len(search_url)):
-        #print(str(n) + url_dict[search_url[n]])
-        #print(neighborhood_totals[n])
-        if neighborhood_totals[n] > 100:
-            new_url = search_url[n] + couch_next
-            #print('Hi')
-            new_soup = BeautifulSoup(urlopen(new_url).read(), 'html.parser')
-            new_rows = new_soup.find_all('span', {'class': 'price'})
-            rows[n] = rows[n] + new_rows
-
-    #extract the integer from each row and replace in list
-    new_rows = []
-    temp_row = []
-
-    for row in rows: # a list of lists --> nested for loops
-        temp_row = []
-        for r in row[0::2]:
-            temp_row.append(int(re.findall('\d+', str(r))[0])) # find_all returns list need first index
-           # print(r)
-        new_rows.append(temp_row)
-
-    #map row names to the search url to identify borough
-    row_map = [url_dict[search_url[n[0]]] for n in enumerate(search_url)]
-    return new_rows, row_map
+if __name__ == "__main__":
+    get_results()
