@@ -6,10 +6,9 @@ import csv
 import subprocess
 import sys
 import matplotlib.pyplot as plt
-#import numpy as np
-#import matplotlib.pyplot as plt
-#global dates 
+import numpy as np
 global month_dict
+import pdb
 month_dict = {1:31, 2:29, 3:31, 4:30, 5:5}
 global months
 months = {1:"January 2016", 2:"February 2016", 3:"March 2016", 4:"April 2016"}
@@ -19,6 +18,12 @@ class InputZeroException(Exception):
 
 class InvalidInputException(Exception):
     pass
+
+class FileNotFoundException(Exception):
+    pass
+
+class NonDictionaryInputException(Exception):
+
 
 def test_dict():
     """contains small test dataset for testing"""
@@ -40,7 +45,6 @@ def make_dates(months, month_dict):
    # month_dict = {1:31, 2:29, 3:31, 4:30}
     d_list = []
     for i in range(1,months+1):
-        print("oh")
         if i < 10:
             m = '0' + str(i)
         else:
@@ -54,7 +58,7 @@ def make_dates(months, month_dict):
                 date = str(l)
                 d_list.append(m + date)
                # print("hey")
-    print("hey")
+   # print("breakpt")
     return d_list
   #  return dates
 
@@ -95,8 +99,9 @@ def get_headlines():
 #    return dates
 
 def write_csv():
+    """writes headline dictionary to a csv in the format ['date','headline']"""
     headlines= get_headlines()
-    with open('test.csv', 'w') as file:
+    with open('headlines.csv', 'w') as file:
         writer = csv.writer(file)
         for y in headlines.keys():
             currlist = headlines[y]
@@ -208,7 +213,8 @@ def make_graphs():
     """outputs the graphs of 1) total returns"""
     #finds the number of days each month that the positive sentiment predicts positive returns
     #number of days that a positive sentiment predicts market rise
-    #return to date from the strategy over 3 months 
+    #return to date from the strategy over 4 months 
+    global months
     dow_dict = parse_dow_csv()
     a = list(dow_dict.keys())
     a = sorted(a)
@@ -229,13 +235,34 @@ def make_graphs():
             date_month = int(a[num+1][0:2])
             new_win_count = return_to_month_neg[date_month] + 1
             return_to_month_neg[date_month] = new_win_count
-    
-    
+    print(return_to_month_pos)
+    print(return_to_month_pos.keys())
+    print(return_to_month_pos.values())
+
+    N = 4
+    pos_values = list(return_to_month_pos.values())
+
+    ind = np.arange(N)  # the x locations for the groups
+    width = 0.35       # the width of the bars
+
+    fig, ax = plt.subplots()
+    rects1 = ax.bar(ind, pos_values, width, color='r')
+    neg_values = list(return_to_month_neg.values())
+    rects2 = ax.bar(ind + width, neg_values, width, color='y')
+
+    ax.set_ylabel('Number of Days Per Month')
+    ax.set_title("Number of Days +/- Sentiment Predicted Corresponding Market Movement")
+    ax.set_xticks(ind + width)
+    ax.set_xticklabels(list(months.values()))
+
+    ax.legend((rects1[0], rects2[0]), ('Positive Sentiment', 'Negative Sentiment'))
+
+    plt.show()
+
 
     
-    #return sentiments
-   # for s in sentiments:
-    #    print(s)
+    #graph the number of correctly predicted positive and negative returns from every month 
+
 
 
 
@@ -246,15 +273,10 @@ if __name__ == "__main__":
     #run tests
     if(len(sys.argv) > 1 and sys.argv[1] == 'run_tests'):
         subprocess.call(" python tests.py", shell=True)
-    make_graphs()
-   # print(x)
-    #write_csv()
-  #  write_csv
+    if(len(sys.argv) > 1 and sys.argv[1] == 'debug'):
+        pdb.run(make_graphs())
+    if(len(sys.argv) > 1 and sys.argv[1] == 'make_graphs'):
+        make_graphs()
 
-    #make_dates(3, month_dict)
-    #test_dict = {'0101':['green 1000 ^^^^ $$$$$m 8sjdfj168']}
-   # token_bad_input = {'0101':['&&& *** ((( ### !!!'], '2020': ['~~~ &&& 7number8']}
-    #test_dict = test_dict()
-  #  d = make_tokens(token_bad_input)
-
+    thrower()
 
