@@ -229,7 +229,7 @@ def parse_sentiment_csv():
 #
 
 def make_graphs():
-    """outputs the graphs of 1) total returns"""
+    """outputs the graphs of correlated positive/negative sentiments to daily market returns"""
     #finds the number of days each month that the positive sentiment predicts positive returns
     #number of days that a positive sentiment predicts market rise
     #return to date from the strategy over 4 months 
@@ -254,9 +254,9 @@ def make_graphs():
             date_month = int(a[num+1][0:2])
             new_win_count = return_to_month_neg[date_month] + 1
             return_to_month_neg[date_month] = new_win_count
-    print(return_to_month_pos)
-    print(return_to_month_pos.keys())
-    print(return_to_month_pos.values())
+  #  print(return_to_month_pos)
+  #  print(return_to_month_pos.keys())
+  #  print(return_to_month_pos.values())
 
 
     N = 4
@@ -276,13 +276,43 @@ def make_graphs():
     ax.set_xticklabels(list(months.values()))
 
     ax.legend((rects1[0], rects2[0]), ('Positive Sentiment', 'Negative Sentiment'))
-
     plt.show()
 
+def second_graph():
+    global months
+    dow_dict = parse_dow_csv()
+    a = list(dow_dict.keys())
+    a = sorted(a)
+    returns = {}
+    for i in range(1,len(a)):
+        returns[a[i]] = (dow_dict[a[i]] - dow_dict[a[i-1]])
 
-    
-    #graph the number of correctly predicted positive and negative returns from every month 
+    #returns to date from buying the day after positive sentiment and selling the day after negative sentiment
+    return_sentiments = {}
+    sentiments = calc_sentiment(parse_sentiment_csv())
+    for num in range(0,len(a)-1):
+        return_sentiments[a[num+1]] = sentiments[a[num]]
 
+   # print(return_sentiments)
+    fig, ax1 = plt.subplots()
+    #t = np.arange(0.01, 10.0, 0.01)
+    s1 = list(returns.values())
+    ax1.plot(s1)
+    ax1.set_xlabel('Day')  
+    ax1.set_title("Sentiment Ratio at time=t Plotted With Dow Return at time=t-1")
+    # Make the y-axis label and tick labels match the line color.
+    ax1.set_ylabel('Returns Jan 1, 2016 - April 20, 2016', color='b')
+    for tl in ax1.get_yticklabels():
+        tl.set_color('b')
+
+
+    ax2 = ax1.twinx()
+    s2 = list(return_sentiments.values())
+    ax2.plot(s2, 'r.')
+    ax2.set_ylabel('Sentiment Ratio', color='r')
+    for tl in ax2.get_yticklabels():
+        tl.set_color('r')
+    plt.show()
 
 
 
@@ -295,8 +325,8 @@ if __name__ == "__main__":
         subprocess.call(" python tests.py", shell=True)
     if(len(sys.argv) > 1 and sys.argv[1] == 'debug'):
         pdb.run(make_graphs())
-    if(len(sys.argv) > 1 and sys.argv[1] == 'make_graphs'):
+    if(len(sys.argv) > 1 and sys.argv[1] == 'first_graph'):
         make_graphs()
-
-    make_tokens('a')
+    if(len(sys.argv) > 1 and sys.argv[1] == 'second_graph'):
+        second_graph()
 
