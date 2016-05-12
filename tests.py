@@ -81,13 +81,52 @@ class Test(unit.TestCase):
 			self.fail
 
 	def test_exception_invalid_input(self):
-		"""make_dates should throw an InputZeroException"""
+		"""make_dates should throw an InvalidInputException"""
 		try: 
 			main.make_dates('a', {'0101':['1','2']})
 		except main.InvalidInputException:
 			self.assertTrue(True)
 		else:
 			self.fail
+
+	def test_exception_invalid_input_tokens(self):
+		"""make_dates should throw an InvalidInputException"""
+		try: 
+			main.make_tokens('a')
+		except main.NonDictionaryInputException:
+			self.assertTrue(True)
+		else:
+			self.fail
+
+	def test_exception_invalid_input_sentiment(self):
+		"""calc_sentiment should throw an InvalidInputException"""
+		try: 
+			main.calc_sentiment('a')
+		except main.NonDictionaryInputException:
+			self.assertTrue(True)
+		else:
+			self.fail
+
+	def test_exception_invalid_input_sentiment(self):
+		"""calc_sentiment should throw an InvalidInputException"""
+		try: 
+			main.calc_sentiment('a')
+		except main.NonDictionaryInputException:
+			self.assertTrue(True)
+		else:
+			self.fail
+
+	def test_exception_file_overwrite(self):
+		"""calc_sentiment should throw an InvalidInputException"""
+		try: 
+			main.write_csv()
+		except main.FileOverwriteException:
+			self.assertTrue(True)
+		else:
+			self.fail
+
+
+
 
 
 

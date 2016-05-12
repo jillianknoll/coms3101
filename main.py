@@ -5,6 +5,7 @@ import unittest as unit
 import csv
 import subprocess
 import sys
+import os
 import matplotlib.pyplot as plt
 import numpy as np
 global month_dict
@@ -23,6 +24,10 @@ class FileNotFoundException(Exception):
     pass
 
 class NonDictionaryInputException(Exception):
+    pass
+
+class FileOverwriteException(Exception):
+    pass
 
 
 def test_dict():
@@ -100,7 +105,11 @@ def get_headlines():
 
 def write_csv():
     """writes headline dictionary to a csv in the format ['date','headline']"""
+    if os.path.isfile("headlines.csv"):
+        raise FileOverwriteException
     headlines= get_headlines()
+    #throw exception if trying to overwrite file
+        #don't want to overwrite webscraped file
     with open('headlines.csv', 'w') as file:
         writer = csv.writer(file)
         for y in headlines.keys():
@@ -110,6 +119,10 @@ def write_csv():
 
 def parse_lang_dict():
     """parses the postive-words and negative words dictionaries"""
+    if not os.path.isfile("negative-words.txt"):
+        raise FileNotFoundException
+    if not os.path.isfile("positive-words.txt"):
+        raise FileNotFoundException
     with open('negative-words.txt','r') as f:
         neg_lines = []
         for line in f:
@@ -137,6 +150,8 @@ def parse_dow_csv():
 def make_tokens(testdict):
     """makes tokens from the list of headlines"""
    # print("tokens")
+    if type(testdict) is not type({'a':1}):
+        raise NonDictionaryInputException
     test_list = testdict
     #test_list = get_headlines()
     tokened_words_to_dates = {}
@@ -156,6 +171,8 @@ def make_tokens(testdict):
 
 def calc_sentiment(testdict):
     """calculates the sentiment as a quantity"""
+    if type(testdict) is not type({'a':1}):
+        raise NonDictionaryInputException
     tokens = make_tokens(testdict)
     #print(tokens)
     date_to_positive = {}
@@ -190,6 +207,8 @@ def calc_sentiment(testdict):
   #  print(date + " Positive: " + str( date_to_positive[date]) + " Negative: " + str(date_to_negative[date]))
 
 def parse_sentiment_csv():
+    if not os.path.isfile("headlines.csv"):
+        raise FileNotFoundException
     headlines_dict = {}
     temp_list = []
     curr_date = ''
@@ -239,6 +258,7 @@ def make_graphs():
     print(return_to_month_pos.keys())
     print(return_to_month_pos.values())
 
+
     N = 4
     pos_values = list(return_to_month_pos.values())
 
@@ -278,5 +298,5 @@ if __name__ == "__main__":
     if(len(sys.argv) > 1 and sys.argv[1] == 'make_graphs'):
         make_graphs()
 
-    thrower()
+    make_tokens('a')
 
